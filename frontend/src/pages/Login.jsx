@@ -1,9 +1,12 @@
+
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const { setUser } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -29,12 +32,11 @@ function Login() {
 
       const data = await loginUser(formData);
 
-      // Save logged-in user in AuthContext
+      // Save logged-in user
       setUser(data.user);
 
-      setMessage(data.message);
-
-      console.log("Logged in user:", data.user);
+      // Redirect to Home after successful login
+      navigate("/", { replace: true });
     } catch (error) {
       setMessage(
         error.response?.data?.message ||
@@ -48,11 +50,8 @@ function Login() {
   return (
     <section className="auth-page">
       <div className="auth-card">
-
         <div className="auth-heading">
-          <p className="section-label">
-            WELCOME BACK
-          </p>
+          <p className="section-label">WELCOME BACK</p>
 
           <h1>
             Login to
@@ -64,61 +63,52 @@ function Login() {
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="auth-form"
-        >
-
-          {/* EMAIL */}
+        <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label>Email Address</label>
+            <label htmlFor="email">Email Address</label>
 
             <input
+              id="email"
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
+              autoComplete="email"
               required
             />
           </div>
 
-          {/* PASSWORD */}
           <div className="form-group">
-            <label>Password</label>
+            <label htmlFor="password">Password</label>
 
             <input
+              id="password"
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
+              autoComplete="current-password"
               required
             />
           </div>
 
-          {/* LOGIN BUTTON */}
           <button
             type="submit"
             className="auth-submit"
             disabled={loading}
           >
-            {loading
-              ? "Logging in..."
-              : "Login"}
-
+            {loading ? "Logging in..." : "Login"}
             <span>→</span>
           </button>
 
-          {/* MESSAGE */}
           {message && (
-            <p className="auth-message">
+            <p className="auth-message" role="alert">
               {message}
             </p>
           )}
-
         </form>
-
       </div>
     </section>
   );

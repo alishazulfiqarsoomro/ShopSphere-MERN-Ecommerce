@@ -1,5 +1,6 @@
 
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 
 // ========================================
 // COMPONENTS
@@ -50,17 +51,9 @@ function Home() {
     <>
       <Navbar />
 
-      {/* ========================================
-          HERO SECTION
-      ======================================== */}
-
       <main className="hero">
         <div className="container hero-content">
-
-          {/* HERO TEXT */}
-
           <div className="hero-text">
-
             <p className="hero-label">
               CURATED FOR YOUR LIFESTYLE
             </p>
@@ -78,37 +71,22 @@ function Home() {
             </p>
 
             <div className="hero-buttons">
-
-              <a
-                href="/shop"
-                className="primary-btn"
-              >
+              <a href="/shop" className="primary-btn">
                 Shop Collection
                 <span>→</span>
               </a>
 
-              <a
-                href="/categories"
-                className="secondary-btn"
-              >
+              <a href="/categories" className="secondary-btn">
                 Explore Categories
               </a>
-
             </div>
-
           </div>
 
-          {/* HERO VISUAL */}
-
           <div className="hero-visual">
-
             <div className="hero-circle"></div>
 
             <div className="hero-card">
-
-              <span>
-                NEW COLLECTION
-              </span>
+              <span>NEW COLLECTION</span>
 
               <h2>
                 Timeless
@@ -116,18 +94,11 @@ function Home() {
                 Essentials
               </h2>
 
-              <p>
-                Discover the latest arrivals.
-              </p>
-
+              <p>Discover the latest arrivals.</p>
             </div>
-
           </div>
-
         </div>
       </main>
-
-      {/* HOME SECTIONS */}
 
       <Categories />
       <About />
@@ -141,53 +112,89 @@ function Home() {
 }
 
 // ========================================
+// HOME ROUTE
+// Unauthenticated users go to Register
+// Authenticated users can access Home
+// ========================================
+
+function HomeRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!user) {
+    return <Navigate to="/register" replace />;
+  }
+
+  return <Home />;
+}
+
+// ========================================
+// AUTH ROUTE
+// Logged-in users don't need Login/Register
+// ========================================
+
+function GuestRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+}
+
+// ========================================
 // APP
 // ========================================
 
 function App() {
   return (
     <Routes>
-
-      {/* ========================================
-          HOME
-      ======================================== */}
+      {/* HOME */}
 
       <Route
         path="/"
-        element={<Home />}
+        element={<HomeRoute />}
       />
 
-      {/* ========================================
-          LOGIN
-      ======================================== */}
+      {/* LOGIN */}
 
       <Route
         path="/login"
         element={
-          <>
-            <Navbar />
-            <Login />
-          </>
+          <GuestRoute>
+            <>
+              <Navbar />
+              <Login />
+              <Footer />
+            </>
+          </GuestRoute>
         }
       />
 
-      {/* ========================================
-          REGISTER
-      ======================================== */}
+      {/* REGISTER */}
 
       <Route
         path="/register"
         element={
-          <>
-            <Navbar />
-            <Register />
-          </>
+          <GuestRoute>
+            <>
+              <Navbar />
+              <Register />
+              <Footer />
+            </>
+          </GuestRoute>
         }
       />
 
-      {/* ========================================
-          SHOP
-      ======================================== */}
+      {/* SHOP */}
 
       <Route
         path="/shop"
@@ -200,9 +207,7 @@ function App() {
         }
       />
 
-      {/* ========================================
-          CATEGORIES
-      ======================================== */}
+      {/* CATEGORIES */}
 
       <Route
         path="/categories"
@@ -215,9 +220,7 @@ function App() {
         }
       />
 
-      {/* ========================================
-          ABOUT
-      ======================================== */}
+      {/* ABOUT */}
 
       <Route
         path="/about"
@@ -230,9 +233,7 @@ function App() {
         }
       />
 
-      {/* ========================================
-          CART
-      ======================================== */}
+      {/* CART */}
 
       <Route
         path="/cart"
@@ -245,9 +246,7 @@ function App() {
         }
       />
 
-      {/* ========================================
-          PRODUCT DETAILS
-      ======================================== */}
+      {/* PRODUCT DETAILS */}
 
       <Route
         path="/product/:id"
@@ -260,9 +259,7 @@ function App() {
         }
       />
 
-      {/* ========================================
-          CHECKOUT
-      ======================================== */}
+      {/* CHECKOUT */}
 
       <Route
         path="/checkout"
@@ -275,9 +272,7 @@ function App() {
         }
       />
 
-      {/* ========================================
-          ORDER SUCCESS
-      ======================================== */}
+      {/* ORDER SUCCESS */}
 
       <Route
         path="/order-success"
@@ -290,9 +285,7 @@ function App() {
         }
       />
 
-      {/* ========================================
-          MY ORDERS
-      ======================================== */}
+      {/* MY ORDERS */}
 
       <Route
         path="/my-orders"
@@ -305,9 +298,7 @@ function App() {
         }
       />
 
-      {/* ========================================
-          ORDER DETAILS
-      ======================================== */}
+      {/* ORDER DETAILS */}
 
       <Route
         path="/my-orders/:id"
@@ -320,14 +311,9 @@ function App() {
         }
       />
 
-      {/* ========================================
-          PROTECTED ADMIN ROUTES
-      ======================================== */}
+      {/* ADMIN ROUTES */}
 
       <Route element={<AdminRoute />}>
-
-        {/* ADMIN DASHBOARD */}
-
         <Route
           path="/admin"
           element={
@@ -338,8 +324,6 @@ function App() {
             </>
           }
         />
-
-        {/* ADMIN ORDERS */}
 
         <Route
           path="/admin/orders"
@@ -352,8 +336,6 @@ function App() {
           }
         />
 
-        {/* ADMIN PRODUCTS */}
-
         <Route
           path="/admin/products"
           element={
@@ -364,8 +346,6 @@ function App() {
             </>
           }
         />
-
-        {/* ADD PRODUCT */}
 
         <Route
           path="/admin/products/add"
@@ -378,8 +358,6 @@ function App() {
           }
         />
 
-        {/* EDIT PRODUCT */}
-
         <Route
           path="/admin/products/edit/:id"
           element={
@@ -390,12 +368,16 @@ function App() {
             </>
           }
         />
-
       </Route>
 
+      {/* FALLBACK */}
+
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
     </Routes>
   );
 }
 
 export default App;
-
